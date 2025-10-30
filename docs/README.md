@@ -47,7 +47,7 @@ Aqui está a estrutura de diretórios recomendada para este projeto:
 │   ├── docs.go
 │   ├── swagger.json
 │   └── swagger.yaml
-├── /sql/                           # Migrations Flyway
+├── /migrate/                           # Migrations Flyway
 │   └── V1__init_schema.sql
 ├── .env.example                    # Exemplo de variáveis de ambiente
 ├── .gitignore
@@ -112,3 +112,95 @@ Prevenção de Ciclos: Implementada na camada de serviço (DepartamentoService) 
 Busca de Árvore Hierárquica: O endpoint GET /api/v1/departamentos/:id retorna a árvore completa usando uma função recursiva (ou CTEs no repositório) para carregar os SubDepartamentos.
 
 Respostas de Erro: Os handlers estão configurados para retornar os códigos HTTP corretos (404, 409, 422) conforme especificado.
+
+Exemplos de Requisições (cURL)
+Aqui estão alguns exemplos de como interagir com a API usando o curl.
+
+(Assumindo que a API está rodando em http://localhost:8080)
+
+Colaboradores
+1. Criar um novo colaborador
+
+Bash
+
+curl -X POST 'http://localhost:8080/api/v1/colaboradores' \
+-H 'Content-Type: application/json' \
+-d '{
+"nome": "Ana Silva",
+"cpf": "12345678909",
+"rg": "MG1234567",
+"departamento_id": "018f3c3e-5c79-7b21-b7e1-d45f80cfa5ab"
+}'
+2. Buscar um colaborador por ID
+
+Bash
+
+curl -X GET 'http://localhost:8080/api/v1/colaboradores/SEU_UUID_AQUI'
+3. Listar colaboradores (com filtro e paginação)
+
+Bash
+
+curl -X POST 'http://localhost:8080/api/v1/colaboradores/listar' \
+-H 'Content-Type: application/json' \
+-d '{
+"filtros": {
+"nome": "Ana",
+"departamento_id": "018f3c3e-5c79-7b21-b7e1-d45f80cfa5ab"
+},
+"pagina": 1,
+"limite": 10
+}'
+4. Atualizar um colaborador
+
+Bash
+
+curl -X PUT 'http://localhost:8080/api/v1/colaboradores/SEU_UUID_AQUI' \
+-H 'Content-Type: application/json' \
+-d '{
+"nome": "Ana Silva Souza",
+"rg": "MG7654321"
+}'
+5. Deletar um colaborador
+
+Bash
+
+curl -X DELETE 'http://localhost:8080/api/v1/colaboradores/SEU_UUID_AQUI'
+Departamentos
+1. Criar um novo departamento
+
+(Nota: O gerente_id e o departamento_superior_id devem existir previamente)
+
+Bash
+
+curl -X POST 'http://localhost:8080/api/v1/departamentos' \
+-H 'Content-Type: application/json' \
+-d '{
+"nome": "Engenharia de Software",
+"gerente_id": "018f3c3e-5c79-7b21-b7e1-d45f80cfa5ab",
+"departamento_superior_id": "018f3c3e-0000-0000-0000-d45f80cfa5ab"
+}'
+2. Buscar um departamento por ID (com árvore hierárquica)
+
+Bash
+
+curl -X GET 'http://localhost:8080/api/v1/departamentos/SEU_UUID_AQUI'
+3. Listar departamentos (com filtro e paginação)
+
+Bash
+
+curl -X POST 'http://localhost:8080/api/v1/departamentos/listar' \
+-H 'Content-Type: application/json' \
+-d '{
+"filtros": {
+"nome": "Engenharia",
+"gerente_nome": "Ana Silva"
+},
+"pagina": 1,
+"limite": 10
+}'
+Gerentes
+1. Listar colaboradores subordinados (recursivamente)
+
+Bash
+
+curl -X GET 'http://localhost:8080/api/v1/gerentes/UUID_DO_GERENTE_AQUI/colaboradores'
