@@ -15,6 +15,32 @@ Documentação: Swagger (usando swaggo)
 
 Containerização: Docker + docker-compose
 
+## Documentação da API
+
+A documentação completa da API está disponível através do Swagger. Com a aplicação rodando, acesse:
+
+**http://localhost:8080/swagger/index.html**
+
+### Gerando/Atualizando a Documentação
+
+Para gerar ou atualizar os arquivos de documentação Swagger após fazer alterações nos comentários dos handlers:
+
+```bash
+make docs
+```
+
+ou
+
+```bash
+swag init -g cmd/server/main.go
+```
+
+Para instalar o swag CLI:
+
+```bash
+make docs-install
+```
+
 Estrutura do Projeto
 
 Aqui está a estrutura de diretórios recomendada para este projeto:
@@ -84,6 +110,37 @@ Acesse a Aplicação:
 API: http://localhost:8080
 
 Swagger Docs: http://localhost:8080/swagger/index.html
+
+## Testando a API
+
+### Via Swagger UI
+1. Acesse http://localhost:8080/swagger/index.html
+2. Explore os endpoints disponíveis organizados por tags (Colaboradores, Departamentos, Gerentes)
+3. Clique em "Try it out" para testar diretamente na interface
+4. Preencha os parâmetros necessários e execute as requisições
+
+### Comandos Rápidos
+
+#### Para acessar o Swagger rapidamente:
+```bash
+# Abrir Swagger no navegador (mais rápido)
+make swagger
+
+# Ou usar o script
+./swagger.sh
+
+# Iniciar API e abrir Swagger automaticamente
+make run-with-swagger
+```
+
+#### Para verificar status:
+```bash
+# Verificar se API está rodando
+./swagger.sh status
+```
+
+### Via cURL
+Você também pode testar usando cURL. Veja os exemplos abaixo.
 
 Documentação da API (Swagger)
 

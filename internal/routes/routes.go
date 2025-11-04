@@ -6,39 +6,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRoutes configura todos os endpoints da API no roteador Gin.
+// SetupRoutes configures all API endpoints in the Gin router.
 func SetupRoutes(
 	r *gin.Engine,
-	colabHandler *handlers.ColaboradorHandler,
-	deptoHandler *handlers.DepartamentoHandler,
-	gerenteHandler *handlers.GerenteHandler,
+	employeeHandler *handlers.EmployeeHandler,
+	deptHandler *handlers.DepartmentHandler,
+	managerHandler *handlers.ManagerHandler,
 ) {
 	v1 := r.Group("/api/v1")
 	{
 		// Rotas de Colaboradores
 		colab := v1.Group("/colaboradores")
 		{
-			colab.POST("", colabHandler.Create)
-			colab.GET("/:id", colabHandler.GetByID)
-			colab.PUT("/:id", colabHandler.Update)
-			colab.DELETE("/:id", colabHandler.Delete)
-			colab.POST("/listar", colabHandler.List)
+			colab.POST("", employeeHandler.Create)
+			colab.GET("/:id", employeeHandler.GetByID)
+			colab.PUT("/:id", employeeHandler.Update)
+			colab.DELETE("/:id", employeeHandler.Delete)
+			colab.POST("/listar", employeeHandler.List)
 		}
 
 		// Rotas de Departamentos
 		depto := v1.Group("/departamentos")
 		{
-			depto.POST("", deptoHandler.Create)
-			depto.GET("/:id", deptoHandler.GetByID)
-			depto.PUT("/:id", deptoHandler.Update)
-			depto.DELETE("/:id", deptoHandler.Delete)
-			depto.POST("/listar", deptoHandler.List)
+			depto.POST("", deptHandler.Create)
+			depto.GET("/:id", deptHandler.GetByID)
+			depto.PUT("/:id", deptHandler.Update)
+			depto.DELETE("/:id", deptHandler.Delete)
+			depto.POST("/listar", deptHandler.List)
 		}
 
 		// Rotas de Gerentes
 		gerentes := v1.Group("/gerentes")
 		{
-			gerentes.GET("/:id/colaboradores", gerenteHandler.GetSubordinados)
+			gerentes.GET("/:id/colaboradores", managerHandler.GetSubordinates)
 		}
 	}
 }

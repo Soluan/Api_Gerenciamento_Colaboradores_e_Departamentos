@@ -7,25 +7,30 @@ import (
 	"gorm.io/gorm"
 )
 
-// Colaborador representa o modelo de dados de um colaborador.
-type Colaborador struct {
+// Employee represents the data model of an employee.
+type Employee struct {
 	ID   uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
-	Nome string    `gorm:"not null" json:"nome"`
+	Name string    `gorm:"not null" json:"name"`
 	CPF  string    `gorm:"not null;uniqueIndex" json:"cpf"`
-	RG   *string   `gorm:"uniqueIndex" json:"rg"` // Ponteiro para aceitar NULL
+	RG   *string   `gorm:"uniqueIndex" json:"rg"` // Pointer to accept NULL
 
-	DepartamentoID uuid.UUID    `gorm:"not null" json:"departamento_id"`
-	Departamento   Departamento `gorm:"foreignKey:DepartamentoID" json:"-"` // Evita recursão no JSON
+	DepartmentID uuid.UUID  `gorm:"not null" json:"department_id"`
+	Department   Department `gorm:"foreignKey:DepartmentID" json:"-"` // Avoids recursion in JSON
 
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-// BeforeCreate é um hook do GORM para gerar UUID v7 antes de criar.
-func (c *Colaborador) BeforeCreate(tx *gorm.DB) (err error) {
+// BeforeCreate is a GORM hook to generate UUID v7 before creating.
+func (c *Employee) BeforeCreate(tx *gorm.DB) (err error) {
 	if c.ID == uuid.Nil {
 		c.ID, err = uuid.NewV7()
 	}
 	return err
+}
+
+// TableName specifies the table name for this model
+func (Employee) TableName() string {
+	return "employees"
 }

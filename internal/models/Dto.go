@@ -2,53 +2,53 @@ package models
 
 import "github.com/google/uuid"
 
-// ColaboradorComGerenteResponse é o DTO de resposta para GetByID.
-type ColaboradorComGerenteResponse struct {
-	*Colaborador
-	GerenteNome *string `json:"gerente_nome"`
+// EmployeeWithManagerResponse is the DTO response for GetByID.
+type EmployeeWithManagerResponse struct {
+	*Employee
+	ManagerName *string `json:"manager_name"`
 }
 
-type CreateColaboradorDTO struct {
-	Nome           string    `json:"nome" binding:"required"`
-	CPF            string    `json:"cpf" binding:"required"` // Validação de formato (ex: 11 dígitos) pode ser adicionada
-	RG             *string   `json:"rg"`
-	DepartamentoID uuid.UUID `json:"departamento_id" binding:"required"`
+type CreateEmployeeDTO struct {
+	Name         string    `json:"name" binding:"required"`
+	CPF          string    `json:"cpf" binding:"required"` // Format validation (e.g: 11 digits) can be added
+	RG           *string   `json:"rg"`
+	DepartmentID uuid.UUID `json:"department_id" binding:"required"`
 }
 
-type UpdateColaboradorDTO struct {
-	Nome           *string    `json:"nome"`
-	RG             *string    `json:"rg"`
-	DepartamentoID *uuid.UUID `json:"departamento_id"`
+type UpdateEmployeeDTO struct {
+	Name         *string    `json:"name"`
+	RG           *string    `json:"rg"`
+	DepartmentID *uuid.UUID `json:"department_id"`
 }
 
-type ListColaboradoresDTO struct {
-	Nome           *string    `json:"nome"`
-	CPF            *string    `json:"cpf"`
-	RG             *string    `json:"rg"`
-	DepartamentoID *uuid.UUID `json:"departamento_id"`
-	Pagina         int        `json:"pagina" binding:"omitempty,gte=1"`
-	TamanhoPagina  int        `json:"tamanho_pagina" binding:"omitempty,gte=1"`
+type ListEmployeesDTO struct {
+	Name         *string    `json:"name"`
+	CPF          *string    `json:"cpf"`
+	RG           *string    `json:"rg"`
+	DepartmentID *uuid.UUID `json:"department_id"`
+	Page         int        `json:"page" binding:"omitempty,gte=1"`
+	PageSize     int        `json:"page_size" binding:"omitempty,gte=1"`
 }
 
-// Departament
-type CreateDepartamentoDTO struct {
-	Nome                   string     `json:"nome" binding:"required"`
-	GerenteID              uuid.UUID  `json:"gerente_id" binding:"required"`
-	DepartamentoSuperiorID *uuid.UUID `json:"departamento_superior_id"`
+// Department DTOs
+type CreateDepartmentDTO struct {
+	Name               string     `json:"name" binding:"required"`
+	ManagerID          uuid.UUID  `json:"manager_id" binding:"required"`
+	ParentDepartmentID *uuid.UUID `json:"parent_department_id"`
 }
 
-// UpdateDepartamentoDTO é usado para atualizar um departamento.
-type UpdateDepartamentoDTO struct {
-	Nome                   *string    `json:"nome"`
-	GerenteID              *uuid.UUID `json:"gerente_id"`
-	DepartamentoSuperiorID *uuid.UUID `json:"departamento_superior_id"`
+// UpdateDepartmentDTO is used to update a department.
+type UpdateDepartmentDTO struct {
+	Name               *string    `json:"name"`
+	ManagerID          *uuid.UUID `json:"manager_id"`
+	ParentDepartmentID *uuid.UUID `json:"parent_department_id"`
 }
 
-// ListDepartamentosDTO é usado para filtros e paginação.
-type ListDepartamentosDTO struct {
-	Nome                   *string    `json:"nome"`
-	GerenteNome            *string    `json:"gerente_nome"` // Filtro especial
-	DepartamentoSuperiorID *uuid.UUID `json:"departamento_superior_id"`
-	Pagina                 int        `json:"pagina" binding:"omitempty,gte=1"`
-	TamanhoPagina          int        `json:"tamanho_pagina" binding:"omitempty,gte=1"`
+// ListDepartmentsDTO is used for filters and pagination.
+type ListDepartmentsDTO struct {
+	Name               *string    `json:"name"`
+	ManagerName        *string    `json:"manager_name"` // Special filter
+	ParentDepartmentID *uuid.UUID `json:"parent_department_id"`
+	Page               int        `json:"page" binding:"omitempty,gte=1"`
+	PageSize           int        `json:"page_size" binding:"omitempty,gte=1"`
 }

@@ -7,33 +7,33 @@ import (
 )
 
 var (
-	ErrColaboradorNaoEncontrado           = errors.New("colaborador nao encontrado")
-	ErrDepartamentoSuperiorNaoEncontrado  = errors.New("departamento superior não encontrado")
-	ErrCicloDetectado                     = errors.New("ciclo hierárquico detectado")
-	ErrDepartamentoPossuiColaboradores    = errors.New("departamento possui colaboradores vinculados")
-	ErrDepartamentoPossuiSubDepartamentos = errors.New("departamento possui sub-departamentos vinculados")
-	ErrGerenteNaoPertenceAoDepto          = errors.New("o gerente deve pertencer ao departamento que irá gerenciar")
-	ErrNaoEncontrado                      = errors.New("recurso não encontrado")
-	ErrInvalido                           = errors.New("dados fornecidos são inválidos")
-	ErrDepartamentoNaoEncontrado          = errors.New("departamento não encontrado")
-	ErrCPFDuplicado                       = errors.New("CPF já cadastrado")
-	ErrRGDuplicado                        = errors.New("RG já cadastrado")
-	ErrGerenteNaoEncontrado               = errors.New("gerente não encontrado")
-	ErrGerenteNaoPodeSerExcluido          = errors.New("colaborador é gerente e não pode ser removido")
+	ErrEmployeeNotFound             = errors.New("employee not found")
+	ErrParentDepartmentNotFound     = errors.New("parent department not found")
+	ErrCycleDetected                = errors.New("hierarchical cycle detected")
+	ErrDepartmentHasEmployees       = errors.New("department has linked employees")
+	ErrDepartmentHasSubDepartments  = errors.New("department has linked sub-departments")
+	ErrManagerNotBelongToDepartment = errors.New("the manager must belong to the department they will manage")
+	ErrNotFound                     = errors.New("resource not found")
+	ErrInvalid                      = errors.New("provided data is invalid")
+	ErrDepartmentNotFound           = errors.New("department not found")
+	ErrCPFDuplicated                = errors.New("CPF already registered")
+	ErrRGDuplicated                 = errors.New("RG already registered")
+	ErrManagerNotFound              = errors.New("manager not found")
+	ErrManagerCannotBeDeleted       = errors.New("employee is a manager and cannot be removed")
 )
 
-// CustomError representa uma estrutura de erro padronizada para a API (Resposta HTTP).
+// CustomError represents a standardized error structure for the API (HTTP Response).
 type CustomError struct {
-	Code    int    `json:"-"` // Código HTTP (não serializado no JSON)
+	Code    int    `json:"-"` // HTTP Code (not serialized in JSON)
 	Message string `json:"message"`
-	Details string `json:"details,omitempty"` // Detalhes técnicos (o erro original .Error())
+	Details string `json:"details,omitempty"` // Technical details (the original error .Error())
 }
 
 func (e *CustomError) Error() string {
 	if e.Details != "" {
-		return fmt.Sprintf("Erro Customizado (HTTP %d): %s - Detalhes: %s", e.Code, e.Message, e.Details)
+		return fmt.Sprintf("Custom Error (HTTP %d): %s - Details: %s", e.Code, e.Message, e.Details)
 	}
-	return fmt.Sprintf("Erro Customizado (HTTP %d): %s", e.Code, e.Message)
+	return fmt.Sprintf("Custom Error (HTTP %d): %s", e.Code, e.Message)
 }
 
 func NewCustomError(code int, message string, details string) *CustomError {
@@ -44,21 +44,21 @@ func NewCustomError(code int, message string, details string) *CustomError {
 	}
 }
 
-// MapErrorToCustom converte um erro de regra de negócio (padrão Go error) para um CustomError
+// MapErrorToCustom converts a business rule error (standard Go error) to a CustomError
 func MapErrorToCustom(err error) *CustomError {
 	switch {
-	case errors.Is(err, ErrDepartamentoSuperiorNaoEncontrado),
-		errors.Is(err, ErrNaoEncontrado):
-		return NewCustomError(http.StatusNotFound, "Recurso não encontrado.", err.Error())
+	case errors.Is(err, ErrParentDepartmentNotFound),
+		errors.Is(err, ErrNotFound):
+		return NewCustomError(http.StatusNotFound, "Resource not found.", err.Error())
 	}
 
 	switch {
-	case errors.Is(err, ErrCicloDetectado),
-		errors.Is(err, ErrDepartamentoPossuiColaboradores),
-		errors.Is(err, ErrDepartamentoPossuiSubDepartamentos),
-		errors.Is(err, ErrGerenteNaoPertenceAoDepto),
-		errors.Is(err, ErrInvalido):
-		return NewCustomError(http.StatusBadRequest, "Falha na regra de negócio ou dados inválidos.", err.Error())
+	case errors.Is(err, ErrCycleDetected),
+		errors.Is(err, ErrDepartmentHasEmployees),
+		errors.Is(err, ErrDepartmentHasSubDepartments),
+		errors.Is(err, ErrManagerNotBelongToDepartment),
+		errors.Is(err, ErrInvalid):
+		return NewCustomError(http.StatusBadRequest, "Business rule failure or invalid data.", err.Error())
 	}
 
 	var customErr *CustomError
@@ -66,5 +66,5 @@ func MapErrorToCustom(err error) *CustomError {
 		return customErr
 	}
 
-	return NewCustomError(http.StatusInternalServerError, "Erro interno do servidor.", err.Error())
+	return NewCustomError(http.StatusInternalServerError, "Internal server error.", err.Error())
 }

@@ -1,0 +1,539 @@
+basePath: /api/v1
+definitions:
+  models.CreateDepartmentDTO:
+    properties:
+      manager_id:
+        type: string
+      name:
+        type: string
+      parent_department_id:
+        type: string
+    required:
+    - manager_id
+    - name
+    type: object
+  models.CreateEmployeeDTO:
+    properties:
+      cpf:
+        description: 'Format validation (e.g: 11 digits) can be added'
+        type: string
+      department_id:
+        type: string
+      name:
+        type: string
+      rg:
+        type: string
+    required:
+    - cpf
+    - department_id
+    - name
+    type: object
+  models.Department:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      manager:
+        $ref: '#/definitions/models.Employee'
+      manager_id:
+        description: Pointer to accept NULL
+        type: string
+      name:
+        type: string
+      parent_department_id:
+        description: Pointer to accept NULL
+        type: string
+      sub_departments:
+        description: Used to load the hierarchical tree
+        items:
+          $ref: '#/definitions/models.Department'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.Employee:
+    properties:
+      cpf:
+        type: string
+      created_at:
+        type: string
+      department_id:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      rg:
+        description: Pointer to accept NULL
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.EmployeeWithManagerResponse:
+    properties:
+      cpf:
+        type: string
+      created_at:
+        type: string
+      department_id:
+        type: string
+      id:
+        type: string
+      manager_name:
+        type: string
+      name:
+        type: string
+      rg:
+        description: Pointer to accept NULL
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ListDepartmentsDTO:
+    properties:
+      manager_name:
+        description: Special filter
+        type: string
+      name:
+        type: string
+      page:
+        minimum: 1
+        type: integer
+      page_size:
+        minimum: 1
+        type: integer
+      parent_department_id:
+        type: string
+    type: object
+  models.ListEmployeesDTO:
+    properties:
+      cpf:
+        type: string
+      department_id:
+        type: string
+      name:
+        type: string
+      page:
+        minimum: 1
+        type: integer
+      page_size:
+        minimum: 1
+        type: integer
+      rg:
+        type: string
+    type: object
+  models.UpdateDepartmentDTO:
+    properties:
+      manager_id:
+        type: string
+      name:
+        type: string
+      parent_department_id:
+        type: string
+    type: object
+  models.UpdateEmployeeDTO:
+    properties:
+      department_id:
+        type: string
+      name:
+        type: string
+      rg:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API to manage employees and departments of a company.
+  title: Employee and Department Management API
+  version: "1.0"
+paths:
+  /colaboradores:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new employee with the provided data
+      parameters:
+      - description: Employee data
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateEmployeeDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Employee'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: CPF or RG already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Department not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new employee
+      tags:
+      - Colaboradores
+  /colaboradores/{id}:
+    delete:
+      description: Removes an employee (soft delete)
+      parameters:
+      - description: Employee ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Employee not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Manager cannot be deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an employee
+      tags:
+      - Colaboradores
+    get:
+      description: Returns an employee by ID with manager information
+      parameters:
+      - description: Employee ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmployeeWithManagerResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Employee not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get employee by ID
+      tags:
+      - Colaboradores
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing employee with the provided data
+      parameters:
+      - description: Employee ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated employee data
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateEmployeeDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Employee'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Employee not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: RG already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Department not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an employee
+      tags:
+      - Colaboradores
+  /colaboradores/listar:
+    post:
+      consumes:
+      - application/json
+      description: Returns a paginated list of employees based on filters
+      parameters:
+      - description: Filters and pagination
+        in: body
+        name: filters
+        schema:
+          $ref: '#/definitions/models.ListEmployeesDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Employee'
+            type: array
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List employees with filters
+      tags:
+      - Colaboradores
+  /departamentos:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new department with the provided data
+      parameters:
+      - description: Department data
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDepartmentDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Department'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Validation error (Invalid Manager/Parent Department)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new department
+      tags:
+      - Departamentos
+  /departamentos/{id}:
+    delete:
+      description: Removes a department (soft delete)
+      parameters:
+      - description: Department ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Department not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Cannot remove department with employees or sub-departments
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a department
+      tags:
+      - Departamentos
+    get:
+      description: Returns department with manager and complete hierarchical tree
+        of sub-departments
+      parameters:
+      - description: Department ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Department with SubDepartments filled
+          schema:
+            $ref: '#/definitions/models.Department'
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Department not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get department by ID with hierarchical tree
+      tags:
+      - Departamentos
+    put:
+      consumes:
+      - application/json
+      description: Updates department data and prevents cycles
+      parameters:
+      - description: Department ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDepartmentDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Department'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Department not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Validation error (Invalid Manager/Parent Department or Cycle
+            detected)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a department
+      tags:
+      - Departamentos
+  /departamentos/listar:
+    post:
+      consumes:
+      - application/json
+      description: Returns a paginated list of departments based on filters
+      parameters:
+      - description: Filters and pagination
+        in: body
+        name: filters
+        schema:
+          $ref: '#/definitions/models.ListDepartmentsDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Department'
+            type: array
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List departments with filters
+      tags:
+      - Departamentos
+  /gerentes/{id}/colaboradores:
+    get:
+      description: Returns all employees from departments subordinated to the manager,
+        recursively
+      parameters:
+      - description: Manager ID (Employee UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Employee'
+            type: array
+        "400":
+          description: Invalid ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Manager not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List employees subordinated to a manager
+      tags:
+      - Gerentes
+swagger: "2.0"

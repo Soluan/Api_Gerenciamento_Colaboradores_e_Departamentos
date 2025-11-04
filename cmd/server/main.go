@@ -14,48 +14,50 @@ import (
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "ManageEmployeesandDepartments/docs" // Import docs for swagger
 )
 
-// @title API de Gestão de Colaboradores e Departamentos
+// @title Employee and Department Management API
 // @version 1.0
-// @description API para gerenciar colaboradores e departamentos de uma empresa.
+// @description API to manage employees and departments of a company.
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
-	// Carrega .env localmente (não necessário no Docker, mas bom para dev)
+	// Load .env locally (not required in Docker, but good for dev)
 	if err := godotenv.Load(); err != nil {
-		log.Println("Arquivo .env não encontrado, usando variáveis de ambiente.")
+		log.Println(".env file not found, using environment variables.")
 	}
 
-	// Conecta ao banco de dados
+	// Connect to database
 	db, err := db.ConnectDatabase()
 	if err != nil {
-		log.Fatal("Falha ao conectar ao banco de dados: ", err)
+		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	// Repositórios
-	colabRepo := repository.NewColaboradorRepository(db)
-	deptoRepo := repository.NewDepartamentoRepository(db)
+	// Repositories
+	employeeRepo := repository.NewEmployeeRepository(db)
+	deptRepo := repository.NewDepartmentRepository(db)
 
-	// Serviços
-	colabService := services.NewColaboradorService(deptoRepo, colabRepo)
-	deptoService := services.NewDepartamentoService(deptoRepo, colabRepo)
+	// Services
+	employeeService := services.NewEmployeeService(deptRepo, employeeRepo)
+	deptService := services.NewDepartmentService(deptRepo, employeeRepo)
 
 	// Handlers
-	colabHandler := handlers.NewColaboradorHandler(colabService)
-	deptoHandler := handlers.NewDepartamentoHandler(deptoService)
-	gerenteHandler := handlers.NewGerenteHandler(deptoService)
+	employeeHandler := handlers.NewEmployeeHandler(employeeService)
+	deptHandler := handlers.NewDepartmentHandler(deptService)
+	managerHandler := handlers.NewManagerHandler(deptService)
 
-	// Inicializa o Roteador Gin
+	// Initialize Gin Router
 	r := gin.Default()
 
-	// Configura as Rotas
-	routes.SetupRoutes(r, colabHandler, deptoHandler, gerenteHandler)
+	// Setup Routes
+	routes.SetupRoutes(r, employeeHandler, deptHandler, managerHandler)
 
-	// Configura o Swagger
+	// Setup Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Inicia o Servidor
+	// Start Server
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		port = "8080"
