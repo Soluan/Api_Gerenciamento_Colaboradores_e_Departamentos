@@ -33,15 +33,15 @@ func NewDepartamentoHandler(s services.DepartamentoService) *DepartamentoHandler
 // @Failure 422 {object} map[string]string "Erro de validação (Gerente/Depto Superior inválido)"
 // @Router /departamentos [post]
 func (h *DepartamentoHandler) Create(c *gin.Context) {
-	var dto models.CreateDepartamentoDTO
+	var dto models.CreateDepartmentDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Requisição inválida: " + err.Error()})
 		return
 	}
 
-	depto, err := h.service.CreateDepartamento(dto.Nome, dto.GerenteID, dto.DepartamentoSuperiorID)
+	depto, err := h.service.CreateDepartamento(dto.Name, dto.ManagerID, dto.ParentDepartmentID)
 	if err != nil {
-		if err == utils.ErrGerenteNaoEncontrado || err == utils.ErrDepartamentoSuperiorNaoEncontrado || err == utils.ErrGerenteNaoPertenceAoDepto {
+		if err == utils.ErrManagerNotFound || err == utils.ErrDepartmentNotFound || err == utils.ErrManagerNotBelongToDepartment {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}
@@ -100,18 +100,18 @@ func (h *DepartamentoHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var dto models.UpdateDepartamentoDTO
+	var dto models.UpdateDepartmentDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Requisição inválida: " + err.Error()})
 		return
 	}
 
-	depto, err := h.service.UpdateDepartamento(id, dto.Nome, dto.GerenteID, dto.DepartamentoSuperiorID)
+	depto, err := h.service.UpdateDepartamento(id, dto.Name, dto.ManagerID, dto.ParentDepartmentID)
 	if err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			c.JSON(http.StatusNotFound, gin.H{"error": "Departamento não encontrado"})
-		case utils.ErrCicloDetectado, utils.ErrGerenteNaoEncontrado, utils.ErrDepartamentoSuperiorNaoEncontrado, utils.ErrGerenteNaoPertenceAoDepto:
+		case utils.ErrCycleDetected, utils.ErrManagerNotFound, utils.ErrDepartmentHasSubDepartments, utils.ErrManagerNotBelongToDepartment:
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar departamento"})
@@ -143,7 +143,7 @@ func (h *DepartamentoHandler) Delete(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Departamento não encontrado"})
 			return
 		}
-		if errors.Is(err, utils.ErrDepartamentoPossuiColaboradores) || errors.Is(err, utils.ErrDepartamentoPossuiSubDepartamentos) {
+		if errors.Is(err, utils.ErrEmployeeNotFound) || errors.Is(err, utils.ErrDepartmentHasSubDepartments) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}
@@ -164,11 +164,11 @@ func (h *DepartamentoHandler) Delete(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Requisição inválida"
 // @Router /departamentos/listar [post]
 func (h *DepartamentoHandler) List(c *gin.Context) {
-	var dto models.ListDepartamentosDTO
+	var dto models.ListDepartmentsDTO
 
 	// Defaults
-	dto.Pagina = 1
-	dto.TamanhoPagina = 10
+	dto.Page = 1
+	dto.PageSize = 10
 
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		if err.Error() != "EOF" { // Permite body vazio
@@ -177,21 +177,21 @@ func (h *DepartamentoHandler) List(c *gin.Context) {
 		}
 	}
 
-	if dto.Pagina <= 0 {
-		dto.Pagina = 1
+	if dto.Page <= 0 {
+		dto.Page = 1
 	}
-	if dto.TamanhoPagina <= 0 {
-		dto.TamanhoPagina = 10
+	if dto.PageSize <= 0 {
+		dto.PageSize = 10
 	}
 
-	deptos, err := h.service.ListDepartamentos(dto.Nome, dto.GerenteNome, dto.DepartamentoSuperiorID, dto.Pagina, dto.TamanhoPagina)
+	deptos, err := h.service.ListDepartamentos(dto.Name, dto.ManagerName, dto.ParentDepartmentID, dto.Page, dto.PageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar departamentos"})
 		return
 	}
 
 	if deptos == nil {
-		deptos = []*models.Departamento{} // Retorna lista vazia
+		deptos = []*models.Department{}
 	}
 
 	c.JSON(http.StatusOK, deptos)
