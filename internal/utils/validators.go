@@ -1,8 +1,5 @@
 package utils
 
-// Este arquivo conteria validadores customizados, como o de CPF.
-// Por brevidade, vamos apenas definir a estrutura.
-
 import (
 	"strconv"
 )
