@@ -8,7 +8,6 @@ import (
 )
 
 // IsCPFValido implementa o algoritmo de validação de CPF.
-// (Esta é uma implementação de exemplo, não use em produção sem testar)
 func IsCPFValido(cpf string) bool {
 	// Remove pontuação
 	cpf = removeNaoDigitos(cpf)
