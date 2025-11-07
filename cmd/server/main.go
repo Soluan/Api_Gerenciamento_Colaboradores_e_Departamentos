@@ -45,7 +45,7 @@ func main() {
 
 	// Handlers
 	employeeHandler := handlers.NewEmployeeHandler(employeeService)
-	deptHandler := handlers.NewDepartmentHandler(deptService)
+	deptHandler := handlers.NewDepartamentoHandler(deptService)
 	managerHandler := handlers.NewManagerHandler(deptService)
 
 	// Initialize Gin Router

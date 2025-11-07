@@ -12,13 +12,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// DepartamentoHandler lida com as requisições HTTP para Departamentos.
+// DepartamentService lida com as requisições HTTP para Departamentos.
 type DepartamentoHandler struct {
-	service services.DepartamentoService
+	service services.DepartmentService
 }
 
 // NewDepartamentoHandler cria um novo handler de departamento.
-func NewDepartamentoHandler(s services.DepartamentoService) *DepartamentoHandler {
+func NewDepartamentoHandler(s services.DepartmentService) *DepartamentoHandler {
 	return &DepartamentoHandler{service: s}
 }
 
@@ -39,7 +39,7 @@ func (h *DepartamentoHandler) Create(c *gin.Context) {
 		return
 	}
 
-	depto, err := h.service.CreateDepartamento(dto.Name, dto.ManagerID, dto.ParentDepartmentID)
+	depto, err := h.service.CreateDepartment(dto.Name, dto.ManagerID, dto.ParentDepartmentID)
 	if err != nil {
 		if err == utils.ErrManagerNotFound || err == utils.ErrDepartmentNotFound || err == utils.ErrManagerNotBelongToDepartment {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
@@ -68,7 +68,7 @@ func (h *DepartamentoHandler) GetByID(c *gin.Context) {
 	}
 
 	// O serviço deve carregar a árvore completa
-	depto, err := h.service.GetDepartamentoComArvore(id)
+	depto, err := h.service.GetDepartmentWithTree(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Departamento não encontrado"})
@@ -106,7 +106,7 @@ func (h *DepartamentoHandler) Update(c *gin.Context) {
 		return
 	}
 
-	depto, err := h.service.UpdateDepartamento(id, dto.Name, dto.ManagerID, dto.ParentDepartmentID)
+	depto, err := h.service.UpdateDepartment(id, dto.Name, dto.ManagerID, dto.ParentDepartmentID)
 	if err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
@@ -137,7 +137,7 @@ func (h *DepartamentoHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.service.DeleteDepartamento(id)
+	err = h.service.DeleteDepartment(id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Departamento não encontrado"})
@@ -184,7 +184,7 @@ func (h *DepartamentoHandler) List(c *gin.Context) {
 		dto.PageSize = 10
 	}
 
-	deptos, err := h.service.ListDepartamentos(dto.Name, dto.ManagerName, dto.ParentDepartmentID, dto.Page, dto.PageSize)
+	deptos, err := h.service.ListDepartments(dto.Name, dto.ManagerName, dto.ParentDepartmentID, dto.Page, dto.PageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar departamentos"})
 		return

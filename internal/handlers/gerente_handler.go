@@ -13,11 +13,11 @@ import (
 
 // GerenteHandler lida com as requisições HTTP para Gerentes.
 type GerenteHandler struct {
-	deptoService services.DepartamentoService
+	deptoService services.DepartmentService
 }
 
 // NewGerenteHandler cria um novo handler de gerente.
-func NewGerenteHandler(ds services.DepartamentoService) *GerenteHandler {
+func NewGerenteHandler(ds services.DepartmentService) *GerenteHandler {
 	return &GerenteHandler{deptoService: ds}
 }
 
@@ -37,9 +37,9 @@ func (h *GerenteHandler) GetSubordinados(c *gin.Context) {
 		return
 	}
 
-	colaboradores, err := h.deptoService.GetColaboradoresSubordinadosRecursivamente(gerenteID)
+	colaboradores, err := h.deptoService.GetSubordinateEmployeesRecursively(gerenteID)
 	if err != nil {
-		if errors.Is(err, utils.ErrGerenteNaoEncontrado) {
+		if errors.Is(err, utils.ErrEmployeeNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
@@ -48,7 +48,7 @@ func (h *GerenteHandler) GetSubordinados(c *gin.Context) {
 	}
 
 	if colaboradores == nil {
-		colaboradores = []*models.Colaborador{} // Retorna lista vazia
+		colaboradores = []*models.Employee{} // Retorna lista vazia
 	}
 
 	c.JSON(http.StatusOK, colaboradores)

@@ -10,7 +10,7 @@ import (
 func SetupRoutes(
 	r *gin.Engine,
 	employeeHandler *handlers.EmployeeHandler,
-	deptHandler *handlers.DepartmentHandler,
+	deptHandler *handlers.DepartamentoHandler,
 	managerHandler *handlers.ManagerHandler,
 ) {
 	v1 := r.Group("/api/v1")
